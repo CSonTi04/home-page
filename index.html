@@ -36,14 +36,9 @@
 
   </div>
 
-  <!--
-    Optional fallback for file:// environments where fetch() may be blocked.
-    If fetch fails, the page will look for window.LINKS_DATA.
-    To enable: create data/links.js that assigns window.LINKS_DATA = { ... }
-    with your JSON content, then uncomment the script tag below.
-    See README.md for details.
-  -->
-  <!-- <script src="./data/links.js"></script> -->
+  <!-- file:// fallback: sets window.LINKS_DATA so the page works without a web server.
+       Mirrors data/links.json. See README.md for details. -->
+  <script src="./data/links.js"></script>
 
   <script src="script.js"></script>
 </body>
