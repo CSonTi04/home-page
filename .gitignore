@@ -9,3 +9,6 @@ Thumbs.db
 # Local background image (optional, may be large)
 # Comment out this line if you want to commit your background image.
 assets/background.jpg
+
+# Personal bookmarks (fill locally, never committed — see data/links_example.js for format)
+data/links.js
