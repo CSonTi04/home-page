@@ -21,7 +21,7 @@ A lightweight, static homepage that replaces a broken new-tab extension. Built w
 ## Quick Start
 
 1. Clone this repo.
-2. Replace `data/links.json` with your own backup (see format below).
+2. Replace `data/links.json` **and** `data/links.js` with your own backup (see format below).
 3. Optionally place a background image at `assets/background.jpg`.
 4. Open `index.html` in your browser, or set it as your browser's homepage.
 
@@ -35,7 +35,7 @@ styles.css          All styles (dark/light themes, grid, tiles)
 script.js           All logic (user config at the top)
 data/
   links.json        Your links backup — the canonical data source
-  links.js          Optional fallback for file:// (see below)
+  links.js          file:// fallback — mirrors links.json (see "file:// Compatibility" below)
 assets/
   background.jpg    Local background image (optional)
 README.md
@@ -142,31 +142,41 @@ Dark is the default. Click ☀️ / 🌙 to toggle. The choice is saved in `loca
 `fetch()` from `file://` URLs may be blocked by some browsers (notably Chromium-based browsers with default settings). The page uses a two-step fallback:
 
 1. **Primary:** `fetch('./data/links.json')` — works in Firefox and when served via `localhost`.
-2. **Fallback:** If fetch fails, the page checks `window.LINKS_DATA` — a global variable you can set via `data/links.js`.
+2. **Fallback:** If fetch fails, the page checks `window.LINKS_DATA` — set by `data/links.js`, which is included automatically and mirrors `data/links.json`.
 
-### Setting Up the JS Fallback
+This means the page works out of the box from `file://` in all modern browsers with no extra configuration.
 
-If `fetch` does not work in your browser from `file://`:
+### Keeping links.js in sync
 
-1. Create `data/links.js`:
-   ```js
-   window.LINKS_DATA = {
-     // paste the contents of your links.json here
-   };
-   ```
-2. Uncomment this line in `index.html`:
-   ```html
-   <script src="./data/links.js"></script>
-   ```
+`data/links.js` is a copy of `data/links.json` wrapped in a `window.LINKS_DATA = { ... };` assignment. Whenever you update your bookmarks in `links.json`, regenerate `links.js` with this one-liner (requires Node.js):
 
-The `data/links.js` file is listed in `.gitignore` by default (it may contain personal bookmarks). `data/links.json` is the canonical, version-controlled source.
+```sh
+node -e "const d=require('./data/links.json'); require('fs').writeFileSync('./data/links.js', '// file:// fallback — mirrors data/links.json\nwindow.LINKS_DATA = ' + JSON.stringify(d, null, 2) + ';\n')"
+```
 
-**Chrome tip:** You can launch Chrome with `--allow-file-access-from-files` to enable `fetch` from `file://`. Alternatively, serve the repo locally:
+Or on a Unix shell without Node.js:
+
+```sh
+printf 'window.LINKS_DATA = ' > data/links.js && cat data/links.json >> data/links.js && printf ';\n' >> data/links.js
+```
+
+### Hiding personal bookmarks from git
+
+If you replace the sample data with personal bookmarks and do not want `data/links.js` tracked by git, add it back to `.gitignore`:
+
+```
+data/links.js
+```
+
+In that case `fetch()` remains the primary load path (works on GitHub Pages and `localhost`). For local `file://` use you will need to recreate `links.js` manually after each edit to `links.json`, or serve the repo locally:
+
 ```
 npx serve .
 # or
 python -m http.server
 ```
+
+**Chrome tip:** You can also launch Chrome with `--allow-file-access-from-files` to enable `fetch` from `file://`.
 
 ---
 
