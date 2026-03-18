@@ -10,7 +10,7 @@ const CONFIG = {
 
   // Set to true to attempt loading a daily background from an online source.
   // This fails gracefully if offline or blocked by file:// restrictions.
-  ONLINE_BACKGROUND_ENABLED: false,
+  ONLINE_BACKGROUND_ENABLED: true,
 
   // URL for the online background (only used when ONLINE_BACKGROUND_ENABLED is true)
   ONLINE_BACKGROUND_URL: 'https://picsum.photos/1920/1080',
@@ -235,6 +235,7 @@ function getIconUrl(app) {
   if (!Array.isArray(app.icons)) return null;
   for (const icon of app.icons) {
     if (icon && icon.dataURL) return icon.dataURL;
+    if (icon && icon.url) return icon.url;
   }
   return null;
 }
