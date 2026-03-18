@@ -2,6 +2,8 @@
 
 A lightweight, static homepage that replaces a broken new-tab extension. Built with plain HTML, CSS, and vanilla JavaScript. Works directly from `file://` without a web server.
 
+**[▶ Live Demo on GitHub Pages](https://csonti04.github.io/home-page/)** — shows the page running with dummy data before you download it.
+
 ## Features
 
 - Loads links from a JSON backup file
@@ -60,7 +62,7 @@ Each app JSON string contains:
 | `id` | Unique ID (must match keys in `icons_order` / `user_app_ids`) |
 | `appLaunchUrl` | The URL to open |
 | `enabled` | `true` or `false` — disabled apps are hidden |
-| `icons` | Array of icon objects; each may have a `dataURL` with a base64 image |
+| `icons` | Array of icon objects; each may have a `dataURL` (base64) or a `url` (external image URL) |
 
 ### Minimal example
 
@@ -80,7 +82,13 @@ Each app JSON string contains:
 "user_app_0": "{\"name\": \"GitHub\", \"id\": \"user_app_0\", \"appLaunchUrl\": \"https://github.com\", \"enabled\": true, \"icons\": [{\"size\": 32, \"dataURL\": \"data:image/png;base64,...\"}]}"
 ```
 
-When no valid `dataURL` is found, the page generates an initials badge from the app name.
+### With an external icon URL (e.g. Google favicon service)
+
+```json
+"user_app_0": "{\"name\": \"GitHub\", \"id\": \"user_app_0\", \"appLaunchUrl\": \"https://github.com\", \"enabled\": true, \"icons\": [{\"url\": \"https://www.google.com/s2/favicons?domain=github.com&sz=32\"}]}"
+```
+
+When no valid `dataURL` or `url` is found, the page generates an initials badge from the app name.
 
 ---
 
