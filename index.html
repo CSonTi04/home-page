@@ -29,16 +29,18 @@
         spellcheck="false"
         aria-label="Search query"
       >
-      <button id="search-btn" type="submit" aria-label="Search">&#x1F50D;</button>
     </form>
 
     <main id="grid" aria-label="Bookmarks"></main>
 
   </div>
 
-  <!-- file:// fallback: sets window.LINKS_DATA so the page works without a web server.
-       Mirrors data/links.json. See README.md for details. -->
-  <script src="./data/links.js"></script>
+  <!-- Example/GH-Pages fallback: always loaded, sets window.LINKS_DATA to sample bookmarks.
+       See data/links_example.js for format. -->
+  <script src="./data/links_example.js"></script>
+  <!-- Local override: if data/links.js exists (gitignored), it overwrites window.LINKS_DATA
+       with your personal bookmarks. Safe to omit — missing file is silently ignored. -->
+  <script src="./data/links.js" onerror="console.info('[HomePage] data/links.js not loaded (file missing or error); using links_example.js data.')"></script>
 
   <script src="script.js"></script>
 </body>

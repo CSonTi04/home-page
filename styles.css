@@ -173,7 +173,6 @@ body::before {
   max-width: 580px;
   width: 100%;
   margin: 0 auto;
-  gap: 0.5rem;
 }
 
 #search-input {
@@ -207,34 +206,15 @@ body::before {
   -webkit-appearance: none;
 }
 
-#search-btn {
-  background: var(--btn-bg);
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
-  border-radius: 2rem;
-  padding: 0.6rem 1.1rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background 0.15s;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-#search-btn:hover {
-  background: var(--btn-hover);
-}
-
-#search-btn:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
 /* ============================================================
    GRID
    ============================================================ */
 #grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  /* Column count is set dynamically by script.js (updateGridColumns).
+     The 70px minimum matches the MIN_TILE_WIDTH constant in script.js —
+     this fallback fires only if JS hasn't run yet. */
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
   gap: 0.75rem;
   width: 100%;
 }
@@ -350,7 +330,6 @@ body::before {
   }
 
   #grid {
-    grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
     gap: 0.6rem;
   }
 

@@ -36,6 +36,11 @@ const CONFIG = {
   // Default theme: 'dark' or 'light'
   // System preference is used as a hint, but 'dark' wins if no stored preference exists.
   DEFAULT_THEME: 'dark',
+
+  // Maximum number of bookmark tiles to show per row on wide screens.
+  // The grid will use fewer columns on narrower viewports so tiles never shrink
+  // below a comfortable minimum width (~70 px).  Raise or lower this to taste.
+  ITEMS_PER_ROW: 8,
 };
 
 // ============================================================
@@ -296,6 +301,39 @@ function renderGrid(apps) {
   const grid = document.getElementById('grid');
   if (!grid) return;
   grid.replaceChildren(...apps.map(renderTile));
+  updateGridColumns(); // reapply column count after re-render
+}
+
+// ============================================================
+// RESPONSIVE GRID — reactive column count
+// ============================================================
+
+// Minimum tile width (px) used for the column-count heuristic.
+// Keep in sync with the minmax fallback value in the #grid CSS rule.
+const MIN_TILE_WIDTH = 70;
+
+function updateGridColumns() {
+  const grid = document.getElementById('grid');
+  if (!grid) return;
+  // getComputedStyle returns the resolved pixel value (e.g. "12px" for 0.75rem).
+  // Fall back to 12 (= 0.75rem at 16px base) only if parsing fails.
+  const gapPx = parseFloat(getComputedStyle(grid).gap) || 12;
+  const containerWidth = grid.clientWidth;
+  // How many columns of at least MIN_TILE_WIDTH fit in the available width?
+  const maxByWidth = Math.floor((containerWidth + gapPx) / (MIN_TILE_WIDTH + gapPx));
+  const cols = Math.max(1, Math.min(maxByWidth, CONFIG.ITEMS_PER_ROW));
+  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+}
+
+function initResponsiveGrid() {
+  updateGridColumns();
+  if (typeof ResizeObserver !== 'undefined') {
+    const ro = new ResizeObserver(updateGridColumns);
+    const grid = document.getElementById('grid');
+    if (grid) ro.observe(grid);
+  } else {
+    window.addEventListener('resize', updateGridColumns);
+  }
 }
 
 // ============================================================
@@ -422,6 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initClock();
   initSearch();
   initDragAndDrop();
+  initResponsiveGrid();
   main();
 
   document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
