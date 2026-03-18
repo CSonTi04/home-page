@@ -41,6 +41,12 @@ const CONFIG = {
   // The grid will use fewer columns on narrower viewports so tiles never shrink
   // below a comfortable minimum width (~70 px).  Raise or lower this to taste.
   ITEMS_PER_ROW: 8,
+
+  // Password-protected mode.
+  // Set to true to enable the password gate and hide bookmarks behind a password prompt.
+  // Requires data/links_encrypted.js — generate it with: node tools/encrypt-links.js
+  // When false (default) the page behaves exactly as before.
+  ENCRYPT_DATA: false,
 };
 
 // ============================================================
@@ -444,14 +450,134 @@ function initSearch() {
 }
 
 // ============================================================
+// CRYPTO — AES-256-GCM via Web Crypto API (used when ENCRYPT_DATA is true)
+// ============================================================
+
+// Number of PBKDF2 iterations for key derivation. Matches tools/encrypt-links.js.
+const PBKDF2_ITERATIONS = 100_000;
+// sessionStorage key for the cached (already-decrypted) data within a browser tab.
+const STORAGE_KEY_SESSION = 'hp_session';
+
+function b64ToBytes(b64) {
+  return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+}
+
+async function deriveKey(password, salt) {
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(password),
+    'PBKDF2',
+    false,
+    ['deriveKey'],
+  );
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['decrypt'],
+  );
+}
+
+/**
+ * Decrypt the payload produced by tools/encrypt-links.js.
+ * payload = { salt: base64, iv: base64, ciphertext: base64 }
+ * The ciphertext includes the 16-byte GCM auth tag appended at the end.
+ * Throws a DOMException if the password is wrong (auth tag mismatch).
+ */
+async function decryptLinks(password, payload) {
+  const salt = b64ToBytes(payload.salt);
+  const iv   = b64ToBytes(payload.iv);
+  const data = b64ToBytes(payload.ciphertext);
+  const key  = await deriveKey(password, salt);
+  const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+  return JSON.parse(new TextDecoder().decode(plainBuf));
+}
+
+// ============================================================
+// PASSWORD GATE
+// ============================================================
+
+function showPasswordGate() {
+  const gate = document.getElementById('password-gate');
+  if (gate) gate.hidden = false;
+}
+
+function hidePasswordGate() {
+  const gate = document.getElementById('password-gate');
+  if (gate) gate.hidden = true;
+}
+
+/**
+ * Show the password prompt and call onUnlock(data) once the correct password
+ * is entered.  If the current session already has a cached plaintext (from a
+ * previous unlock in this tab), onUnlock is called immediately without showing
+ * the gate.
+ */
+function initPasswordGate(onUnlock) {
+  // Re-use cached data for the lifetime of the current tab.
+  const cached = sessionStorage.getItem(STORAGE_KEY_SESSION);
+  if (cached) {
+    try {
+      onUnlock(JSON.parse(cached));
+      return;
+    } catch {
+      sessionStorage.removeItem(STORAGE_KEY_SESSION);
+    }
+  }
+
+  showPasswordGate();
+  requestAnimationFrame(() => document.getElementById('password-input')?.focus());
+
+  const form  = document.getElementById('password-form');
+  const input = document.getElementById('password-input');
+  const error = document.getElementById('password-error');
+  const btn   = form?.querySelector('button[type="submit"]');
+  if (!form || !input) return;
+
+  // Guard against adding the listener more than once (e.g. reset-layout re-calls main()).
+  if (form.dataset.listenerBound) return;
+  form.dataset.listenerBound = 'true';
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const password = input.value;
+    if (!password) return;
+
+    if (btn)   btn.disabled = true;
+    if (error) error.hidden = true;
+
+    try {
+      const data = await decryptLinks(password, window.ENCRYPTED_LINKS);
+      sessionStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(data));
+      hidePasswordGate();
+      onUnlock(data);
+    } catch {
+      if (error) error.hidden = false;
+      if (btn)   btn.disabled = false;
+      input.select();
+    }
+  });
+}
+
+// ============================================================
 // MAIN
 // ============================================================
 
 async function main() {
-  const raw = await loadLinksData();
-  let apps = raw ? parseBackup(raw) : [];
-  apps = applyStoredOrder(apps);
-  renderGrid(apps);
+  if (CONFIG.ENCRYPT_DATA && typeof window.ENCRYPTED_LINKS !== 'undefined') {
+    // Password-protected mode: gate is shown; onUnlock fires after correct password.
+    initPasswordGate((raw) => {
+      let apps = raw ? parseBackup(raw) : [];
+      apps = applyStoredOrder(apps);
+      renderGrid(apps);
+    });
+  } else {
+    const raw = await loadLinksData();
+    let apps = raw ? parseBackup(raw) : [];
+    apps = applyStoredOrder(apps);
+    renderGrid(apps);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

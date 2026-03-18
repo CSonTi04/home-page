@@ -180,6 +180,55 @@ python -m http.server
 
 ---
 
+## Password Protection (GitHub Pages)
+
+If you host this page publicly on GitHub Pages, you can hide your personal bookmarks behind a password. Your links are encrypted with AES-256-GCM and only decrypted in the browser after the correct password is entered. The encrypted file is safe to commit.
+
+> **Security note:** This protects your bookmarks from casual discovery. The encryption is strong (AES-256-GCM with a PBKDF2-derived key), but a determined attacker who obtains the encrypted file could attempt an offline brute-force attack. Use a long passphrase to make that impractical.
+
+### Setup
+
+1. **Create your personal `data/links.json`** (see Quick Start above).
+
+2. **Encrypt it** using the provided Node.js tool:
+
+   ```sh
+   node tools/encrypt-links.js
+   ```
+
+   You will be prompted for a password. The tool writes `data/links_encrypted.js`.
+
+3. **Enable the password gate** in `script.js`:
+
+   ```js
+   ENCRYPT_DATA: true,
+   ```
+
+4. **Commit** `data/links_encrypted.js` (the encrypted file is safe to share).
+   Make sure `data/links.json` and `data/links.js` remain gitignored (see `.gitignore`).
+
+5. Push to `main` — GitHub Actions deploys the page automatically.
+
+### How it works
+
+- On page load, a password prompt is shown instead of your bookmarks.
+- The password is used to derive an AES-256-GCM decryption key via PBKDF2 (100,000 iterations, SHA-256).
+- If decryption succeeds (the GCM auth tag is valid), the links are rendered.
+- A wrong password shows an error — nothing is decrypted.
+- The decrypted data is cached in `sessionStorage` so you only need to enter the password once per browser tab.
+
+### Re-encrypting after bookmark changes
+
+Run the encrypt tool again whenever you update `data/links.json`:
+
+```sh
+node tools/encrypt-links.js
+```
+
+Then commit the updated `data/links_encrypted.js`.
+
+---
+
 ## Drag-and-Drop Layout
 
 - Drag tiles to reorder them.
