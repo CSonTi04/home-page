@@ -1,0 +1,11 @@
+{
+  "settings": "{\"searchEnabled\": true, \"use24HourTime\": true, \"locale\": \"hu-HU\"}",
+  "icons_order": "user_app_0,user_app_1,user_app_2,user_app_3,user_app_4,user_app_5",
+  "user_app_ids": "user_app_0,user_app_1,user_app_2,user_app_3,user_app_4,user_app_5",
+  "user_app_0": "{\"name\": \"GitHub\", \"id\": \"user_app_0\", \"appLaunchUrl\": \"https://github.com\", \"enabled\": true, \"icons\": [{\"size\": 16, \"dataURL\": null}]}",
+  "user_app_1": "{\"name\": \"YouTube\", \"id\": \"user_app_1\", \"appLaunchUrl\": \"https://youtube.com\", \"enabled\": true, \"icons\": []}",
+  "user_app_2": "{\"name\": \"Gmail\", \"id\": \"user_app_2\", \"appLaunchUrl\": \"https://mail.google.com\", \"enabled\": true, \"icons\": []}",
+  "user_app_3": "{\"name\": \"Google Drive\", \"id\": \"user_app_3\", \"appLaunchUrl\": \"https://drive.google.com\", \"enabled\": true, \"icons\": []}",
+  "user_app_4": "{\"name\": \"Google Calendar\", \"id\": \"user_app_4\", \"appLaunchUrl\": \"https://calendar.google.com\", \"enabled\": true, \"icons\": []}",
+  "user_app_5": "{\"name\": \"Disabled App\", \"id\": \"user_app_5\", \"appLaunchUrl\": \"https://example.com\", \"enabled\": false, \"icons\": []}"
+}
