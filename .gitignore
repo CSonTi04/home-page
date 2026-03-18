@@ -1,0 +1,15 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# data/links.js is the optional file:// fallback that may contain personal bookmarks.
+# The canonical data source is data/links.json (committed).
+data/links.js
+
+# Local background image (optional, may be large)
+# Comment out this line if you want to commit your background image.
+assets/background.jpg

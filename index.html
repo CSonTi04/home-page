@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="hu" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+
+    <div id="top-bar">
+      <button id="reset-layout" class="ctrl-btn" title="Reset tile order to default">&#x21BA; Reset layout</button>
+      <button id="theme-toggle" class="ctrl-btn" title="Toggle light/dark theme">&#x2600;&#xFE0F;</button>
+    </div>
+
+    <header id="clock" aria-label="Current time and date">
+      <span id="clock-time">00:00:00</span>
+      <span id="clock-date"></span>
+      <span id="clock-day"></span>
+    </header>
+
+    <form id="search-form" role="search" aria-label="Web search">
+      <input
+        id="search-input"
+        type="search"
+        placeholder="Keresés…"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Search query"
+      >
+      <button id="search-btn" type="submit" aria-label="Search">&#x1F50D;</button>
+    </form>
+
+    <main id="grid" aria-label="Bookmarks"></main>
+
+  </div>
+
+  <!--
+    Optional fallback for file:// environments where fetch() may be blocked.
+    If fetch fails, the page will look for window.LINKS_DATA.
+    To enable: create data/links.js that assigns window.LINKS_DATA = { ... }
+    with your JSON content, then uncomment the script tag below.
+    See README.md for details.
+  -->
+  <!-- <script src="./data/links.js"></script> -->
+
+  <script src="script.js"></script>
+</body>
+</html>
